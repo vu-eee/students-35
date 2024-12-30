@@ -1,0 +1,128 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Student Profiles</title>
+
+        <!-- Link to Manifest -->
+        <link rel="manifest" href="manifest.json">
+        
+        <link rel="stylesheet" href="style.css">
+        <style>
+            .icon {
+                width: 24px;
+                height: 24px;
+                margin-right: 10px;
+                vertical-align: middle;
+                cursor: pointer;
+            }
+
+            .contact-icons {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+                margin-top: 10px;
+            }
+
+            .contact-icons a {
+                color: inherit;
+                text-decoration: none;
+            }
+
+            .schedule-container.dark .icon {
+                filter: invert(1); /* Make icons white for dark background */
+            }
+
+            .schedule-container.yellow .icon {
+                filter: none; /* Keep icons black for yellow background */
+            }
+
+            /* Background colors for the cards */
+            .schedule-container.dark {
+                background-color: #333; /* Dark gray background */
+                color: white;          /* White text */
+            }
+
+            .schedule-container.yellow {
+                background-color: #ff0; /* Bright yellow background */
+                color: black;           /* Black text */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <h1>Dept. of EEE</h1>
+                <h2>Student Profiles 35rd Batch</h2>
+                <p>Unofficial Student Contact Database</p>
+                <p>If any data is wrong, please contact with CR</p>
+                <a href="https://vu-eee.github.io/library" target="_blank">
+                    <button id="reloadButton">Online Library</button>
+                </a>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content" id="profiles"></div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>Maintained by Students</p>
+            </div>
+        </div>
+
+        <script>
+            const profilesDiv = document.getElementById('profiles');
+
+            const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBQx8ya4m7Xa4nTDx4cdB_OLGuMyCGhwH4bNlVHQwfk30SY-dfolEMD_ei0pq-l227luK5-jxUWG59/pub?output=tsv';
+
+            // Fetch and display student profiles
+            function fetchProfiles() {
+                fetch(sheetUrl)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                        return response.text();
+                    })
+                    .then(data => {
+                        const rows = data.split('\n');
+                        profilesDiv.innerHTML = ''; // Clear previous profiles
+
+                        rows.forEach((row, index) => {
+                            if (index === 0) return; // Skip header row
+                            const cols = row.split('\t');
+                            if (cols.length < 6) return;
+
+                            const profileContainer = document.createElement('div');
+                            profileContainer.classList.add('schedule-container', index % 2 === 0 ? 'dark' : 'yellow');
+                            profileContainer.innerHTML = `
+                                <h3>ID: ${cols[0]}</h3>
+                                <p>Name: ${cols[1]}</p>
+                                <div class="contact-icons">
+                                    <a href="tel:${cols[2]}" title="Call">
+                                        <img src="https://www.svgrepo.com/download/533283/phone-call.svg" alt="Phone Icon" class="icon">
+                                    </a>
+                                    <a href="https://wa.me/${cols[3]}" target="_blank" title="WhatsApp">
+                                        <img src="https://cdnjs.cloudflare.com/ajax/libs/simple-icons/8.9.0/whatsapp.svg" alt="WhatsApp Icon" class="icon">
+                                    </a>
+                                    <a href="${cols[5].trim()}" target="_blank" title="LinkedIn">
+                                        <img src="https://cdnjs.cloudflare.com/ajax/libs/simple-icons/8.9.0/linkedin.svg" alt="LinkedIn Icon" class="icon">
+                                    </a>
+                                    <a href="${cols[4].trim()}" target="_blank" title="Facebook">
+                                        <img src="https://cdnjs.cloudflare.com/ajax/libs/simple-icons/8.9.0/facebook.svg" alt="Facebook Icon" class="icon">
+                                    </a>
+                                    <a href="mailto:${cols[6]}" title="Email">
+                                        <img src="https://cdnjs.cloudflare.com/ajax/libs/simple-icons/8.9.0/gmail.svg" alt="Email Icon" class="icon">
+                                    </a>
+                                </div>
+                            `;
+                            profilesDiv.appendChild(profileContainer);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching or processing data:', error));
+            }
+
+            // Initialize profiles
+            fetchProfiles();
+        </script>
+    </body>
+</html>
